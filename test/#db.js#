@@ -1,0 +1,49 @@
+var express = require('express');
+var bodyParser = require('body-parser');
+var MongoClient = require('mongodb').MongoClient;
+var url = "mongodb://localhost:27017/";
+
+var db;
+var app = express();
+app.use(bodyParser.json());
+
+MongoClient.connect(url, function(err,database){
+    console.log("Database created.");
+    db = database.db("mydb");
+    db.createCollection("friends", function(err,res){
+	console.log("Collection created.");
+    });
+
+    //Start app only after connection is ready.
+    var server = app.listen(8080,function(){
+	var host = server.address().address;
+	var port = server.address().port;
+	console.log("Bitch listenin at http://%s:%s", host,port);
+    });
+});
+
+app.post('/', function(req,res){    
+    console.log("Bitch received request\n");
+    console.log(req.body);
+
+    //var req = JSON.parse(req.body);
+    //Parse json array and insert json documents.
+    
+    db.collection("friends").insertOne(req.body, function(err,res){
+	if(err) throw err;
+	console.log("Document inserted");
+	//
+    });
+
+
+    db.collection("friends").find().toArray(function(err,docs){
+	console.log(JSON.stringify(docs));
+    });
+    //res.send(req.body);
+
+})
+
+app.get('/something', function(req,res){
+    //Send db's data.
+    
+});

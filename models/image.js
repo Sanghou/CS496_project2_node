@@ -5,9 +5,7 @@ var imageSchema = new Schema({
 
 	id : String,
 	image : String
-},
-{
-	collection : "Img_col"
+},{
+	collection : "images"
 });
-
 module.exports = mongoose.model('image',imageSchema);

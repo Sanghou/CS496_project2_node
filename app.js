@@ -1,29 +1,51 @@
 var express = require('express');
 var bodyParser = require('body-parser');
-var MongoClient = require('mongodb').MongoClient;
-var url = "mongodb://localhost:27017/";
-var db;
 var app = express();
 var mongoose = require('mongoose');
-var schema = mongoose.Schema;
+var routes = require('./routes'); //
+var http = require('http');//
+
+app.use(bodyParser.json({limit: '25mb'}));
+app.use(bodyParser.urlencoded({extended: true, limit: '25mb'}));
+
+//var Image = require('./models/image');
+//var Food = require('./models/food');
+var port = process.env.PORT || 52273;
 
 
-app.use(bodyParser.json());
 
-MongoClient.connect(url, function(err,database){
-	db = database.db("test");
-	db.createCollection("image",function(err,res){
-		console.log("collection, db create");
-	});
+//var router_img = require('./routes')(app,Image);
+//var router_food = require('./routes')(app, Food);
 
-	var server = app.listen(52273,function(){
-	var port = server.address().port;
-	console.log("http://52.78.103.222:%s",port);
-	});
+
+
+var server = app.listen(port, function(){
+	console.log("Express server has started on port" + port)
 });
 
-app.post('/upload',function(req,res){
-	console.log(req);
-	console.log("where");
-	console.log(req.body);
+var db = mongoose.connection;
+db.on('error', console.error);
+db.once('open', function(){
+	console.log("connected to mongod server");
 });
+mongoose.connect('mongodb://127.0.0.1:27017');
+
+app.get('/upload',routes.get_img);
+app.post('/upload',routes.upload_img);
+app.get('/all_food',routes.get_all);
+app.get('/chicken',routes.get_chicken);
+app.get('/pizza',routes.get_pizza);
+app.get('/etc',routes.get_etc);
+
+//app.post('/upload',function(req,res){
+//	console.log(req.body.user_id);
+//	console.log(req.body.image);
+//	var img = new testmodel({id : req.body.user_id , img:"gi"});
+//	console.log(img);
+//	console.log("before save");
+//	img.save(function(err, img){
+//		if(err) return console.error(err);
+//		console.log(img);
+//	});
+//	console.log("after save");
+//});
